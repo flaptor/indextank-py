@@ -73,6 +73,9 @@ class IndexClient:
     
     def get_code(self):
         return self.get_metadata()['code']
+
+    def get_size(self):
+        return self.get_metadata()['size']
     
     def get_creation_time(self):
         """
