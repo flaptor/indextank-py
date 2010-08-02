@@ -34,7 +34,7 @@ class ApiClient:
     
     """ Api urls """
     def __indexes_url(self):      return '%s/%s/indexes' % (self.__api_url, 'v1')
-    def __index_url(self, name):  return '%s/%s' % (self.__indexes_url(), name)
+    def __index_url(self, name):  return '%s/%s' % (self.__indexes_url(), urllib.quote(name))
     
 class IndexClient:
     """
