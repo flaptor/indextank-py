@@ -30,7 +30,7 @@ class ApiClient:
     
     def list_indexes(self):
         _, indexes = _request('GET', self.__indexes_url())
-        return [IndexClient(k, v) for k, v in indexes.iteritems()]
+        return [IndexClient(self.__index_url(k), v) for k, v in indexes.iteritems()]
     
     """ Api urls """
     def __indexes_url(self):      return '%s/%s/indexes' % (self.__api_url, 'v1')
@@ -73,6 +73,9 @@ class IndexClient:
     
     def get_code(self):
         return self.get_metadata()['code']
+
+    def get_size(self):
+        return self.get_metadata()['size']
     
     def get_creation_time(self):
         """
