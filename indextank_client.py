@@ -34,7 +34,7 @@ class ApiClient:
     
     """ Api urls """
     def __indexes_url(self):      return '%s/%s/indexes' % (self.__api_url, 'v1')
-    def __index_url(self, name):  return '%s/%s' % (self.__indexes_url(), name)
+    def __index_url(self, name):  return '%s/%s' % (self.__indexes_url(), urllib.quote(name))
     
 class IndexClient:
     """
@@ -130,6 +130,15 @@ class IndexClient:
                        later be used in scoring functions during searches. 
         """
         _request('PUT', self.__variables_url(), data={'docid': docid, 'variables': variables})
+
+    def update_categories(self, docid, categories):
+        """
+        Updates the categories of the document for the given docid.
+        Arguments:
+            docid: unique document identifier
+            categories: map string -> string with values for the categories. 
+        """
+        _request('PUT', self.__variables_url(), data={'docid': docid, 'categories': categories})
         
     def promote(self, docid, query):
         """
@@ -153,20 +162,33 @@ class IndexClient:
     def list_functions(self):
         _, functions = _request('GET', self.__functions_url())
         return functions 
-    
-    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None):
+
+    """
+    Searches the index
+    Arguments:
+        query: the query string
+        start: result # to start at
+        len: number of results to return
+        scoring_function: a number specifying the scoring function to use when sorting results for this query
+        snippet_fields: a list of field names to retrieve snippets for
+        fetch_fields: a list of field names to retrieve content for
+        category_filter: a string to list of strings map with the values to filter for the categories (faceting)
+    """
+    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None):
         params = { 'q': query }
         if start is not None: params['start'] = start
         if len is not None: params['len'] = len
         if scoring_function is not None: params['function'] = scoring_function
         if snippet_fields is not None: params['snippet'] = snippet_fields
         if fetch_fields is not None: params['fetch'] = fetch_fields
+        if category_filters is not None: params['category_filters'] = json.dumps(category_filters, ensure_ascii=True)
         try:
             _, result = _request('GET', self.__search_url(), params=params)
             return result
         except HttpException, e:
             if e.status == 400:
                 raise InvalidQuery(e.msg)
+            raise
 
     """ metadata management """
     def get_metadata(self):
