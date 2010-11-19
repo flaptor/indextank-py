@@ -141,7 +141,7 @@ class IndexClient:
             docid: unique document identifier
             categories: map string -> string with values for the categories. 
         """
-        _request('PUT', self.__variables_url(), data={'docid': docid, 'categories': categories})
+        _request('PUT', self.__categories_url(), data={'docid': docid, 'categories': categories})
         
     def promote(self, docid, query):
         """
@@ -176,8 +176,9 @@ class IndexClient:
         snippet_fields: a list of field names to retrieve snippets for
         fetch_fields: a list of field names to retrieve content for
         category_filter: a string to list of strings map with the values to filter for the categories (faceting)
+        variables: map integer -> float with values for variables that can later be used in scoring function 
     """
-    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None):
+    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None):
         params = { 'q': query }
         if start is not None: params['start'] = start
         if len is not None: params['len'] = len
@@ -185,6 +186,10 @@ class IndexClient:
         if snippet_fields is not None: params['snippet'] = snippet_fields
         if fetch_fields is not None: params['fetch'] = fetch_fields
         if category_filters is not None: params['category_filters'] = json.dumps(category_filters, ensure_ascii=True)
+        if variables:
+            for k, v in variables.items():
+                params['var%d' % int(k)] = str(v)
+
         try:
             _, result = _request('GET', self.__search_url(), params=params)
             return result
@@ -206,6 +211,7 @@ class IndexClient:
     """ Index urls """
     def __docs_url(self):       return '%s/docs' % (self.__index_url)
     def __variables_url(self):  return '%s/docs/variables' % (self.__index_url)
+    def __categories_url(self):  return '%s/docs/categories' % (self.__index_url)
     def __promote_url(self):    return '%s/promote' % (self.__index_url)
     def __search_url(self):     return '%s/search' % (self.__index_url)
     def __functions_url(self):  return '%s/functions' % (self.__index_url)
