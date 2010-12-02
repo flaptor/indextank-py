@@ -1,4 +1,4 @@
-import json
+import anyjson
 import httplib
 import urllib
 import urlparse
@@ -185,7 +185,7 @@ class IndexClient:
         if scoring_function is not None: params['function'] = scoring_function
         if snippet_fields is not None: params['snippet'] = snippet_fields
         if fetch_fields is not None: params['fetch'] = fetch_fields
-        if category_filters is not None: params['category_filters'] = json.dumps(category_filters, ensure_ascii=True)
+        if category_filters is not None: params['category_filters'] = anyjson.serialize(category_filters)
         if variables:
             for k, v in variables.items():
                 params['var%d' % int(k)] = str(v)
@@ -248,7 +248,10 @@ def _request(method, url, params={}, data={}, headers={}):
     username = splits.username
     password = splits.password
     # drop the auth from the url
-    netloc = splits.hostname + (':%s' % splits.port if splits.port else '')
+    if splits.port:
+        netloc = splits.hostname + (':%s' % splits.port)
+    else:
+        netloc = splits.hostname + (':%s' % '')
     url = urlparse.urlunsplit((splits.scheme, netloc, splits.path, splits.query, splits.fragment))
     if method == 'GET':
         params = urllib.urlencode(params)
@@ -265,7 +268,7 @@ def _request(method, url, params={}, data={}, headers={}):
         authorization = "Basic %s" % base64_credentials[:-1]
         headers['Authorization'] = authorization
     if data:
-        body = json.dumps(data, ensure_ascii=True)
+        body = anyjson.serialize(data)
     else:
         body = ''
     
@@ -276,7 +279,7 @@ def _request(method, url, params={}, data={}, headers={}):
     if _is_ok(response.status):
         if response.body:
             try:
-                response.body = json.loads(response.body)
+                response.body = anyjson.deserialize(response.body)
             except ValueError, e:
                 raise InvalidResponseFromServer('The JSON response could not be parsed: %s.\n%s' % (e, response.body))
             ret = response.status, response.body
