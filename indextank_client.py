@@ -47,6 +47,13 @@ class IndexClient:
         self.__index_url = index_url
         self.__metadata = metadata
 
+    def __repr__(self):
+        if self.__metadata:
+            return 'Index %s\n  index code: %s\n  has started?: %s\n  created on: %s\n  indexed documents: %s' % (self.__index_url, self.__metadata['code'], self.__metadata['started'], self.__metadata['creation_time'], self.__metadata['size'])
+        else:
+            return 'Index %s\n  <no data available>' % (self.__index_url)
+
+
     def exists(self):
         """
         Returns whether an index for the name of this instance
