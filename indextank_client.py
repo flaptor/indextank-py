@@ -250,16 +250,15 @@ def _is_ok(status):
 
 def _request(method, url, params={}, data={}, headers={}):
     splits = urlparse.urlsplit(url)
-    hostname = splits.hostname
-    port = splits.port
-    username = splits.username
-    password = splits.password
-    # drop the auth from the url
-    if splits.port:
-        netloc = splits.hostname + (':%s' % splits.port)
-    else:
-        netloc = splits.hostname + (':%s' % '')
-    url = urlparse.urlunsplit((splits.scheme, netloc, splits.path, splits.query, splits.fragment))
+    netloc = splits[1]
+    netloc_noauth = netloc.split('@')[1]
+    scheme = splits[0]
+    path = splits[2]
+    query = splits[3]
+    fragment = splits[4]
+    username = ''
+    password = netloc.split('@')[0][1:]
+    url = urlparse.urlunsplit((scheme, netloc_noauth, path, query, fragment))
     if method == 'GET':
         params = urllib.urlencode(params)
         if params:
@@ -268,7 +267,7 @@ def _request(method, url, params={}, data={}, headers={}):
             else:
                 url += '&' + params
 
-    connection = httplib.HTTPConnection(hostname, port)
+    connection = httplib.HTTPConnection(netloc_noauth, 80)
     if username or password:
         credentials = "%s:%s" % (username, password)
         base64_credentials = base64.encodestring(credentials)
