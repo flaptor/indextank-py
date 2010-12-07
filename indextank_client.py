@@ -190,8 +190,8 @@ class IndexClient:
         if start is not None: params['start'] = start
         if len is not None: params['len'] = len
         if scoring_function is not None: params['function'] = scoring_function
-        if snippet_fields is not None: params['snippet'] = snippet_fields
-        if fetch_fields is not None: params['fetch'] = fetch_fields
+        if snippet_fields is not None: params['snippet'] = reduce(lambda x,y: x + ',' + y, snippet_fields)
+        if fetch_fields is not None: params['fetch'] = reduce(lambda x,y: x + ',' + y, fetch_fields)
         if category_filters is not None: params['category_filters'] = anyjson.serialize(category_filters)
         if variables:
             for k, v in variables.items():
