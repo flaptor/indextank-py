@@ -222,7 +222,7 @@ class IndexClient:
     def __promote_url(self):    return '%s/promote' % (self.__index_url)
     def __search_url(self):     return '%s/search' % (self.__index_url)
     def __functions_url(self):  return '%s/functions' % (self.__index_url)
-    def __function_url(self,n): return '%s/functions/%d' % (self.__index_url, n)
+    def __function_url(self,n): return '%s/functions/%s' % (self.__index_url, n)
 
 class InvalidResponseFromServer(Exception):
     pass
