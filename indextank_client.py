@@ -176,9 +176,11 @@ class IndexClient:
         snippet_fields: a list of field names to retrieve snippets for
         fetch_fields: a list of field names to retrieve content for
         category_filter: a string to list of strings map with the values to filter for the categories (faceting)
-        variables: map integer -> float with values for variables that can later be used in scoring function 
+        variables: map integer -> float with values for variables that can later be used in scoring function
+        docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+        function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
     """
-    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None):
+    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
         params = { 'q': query }
         if start is not None: params['start'] = start
         if len is not None: params['len'] = len
@@ -189,6 +191,14 @@ class IndexClient:
         if variables:
             for k, v in variables.items():
                 params['var%d' % int(k)] = str(v)
+
+        if docvar_filters:
+            for key in docvar_filters.keys():
+                params['filter_docvar' + key] = json.dumps(docvar_filters.get(key))
+
+        if function_filters:
+            for key in function_filters.keys():
+                params['filter_function' + key] = json.dumps(function_filters.get(key))
 
         try:
             _, result = _request('GET', self.__search_url(), params=params)
