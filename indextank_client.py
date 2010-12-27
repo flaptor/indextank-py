@@ -5,6 +5,8 @@ import urlparse
 import base64
 import datetime
 
+reallen = len
+
 class ApiClient:
     """
     Basic client for an account.
@@ -201,11 +203,27 @@ class IndexClient:
 
         if docvar_filters:
             for key in docvar_filters.keys():
-                params['filter_docvar' + key] = json.dumps(docvar_filters.get(key))
+                value = docvar_filters.get(key)
+                total_value = ''
+                                    
+                for range in value:
+                    if reallen(total_value) != 0:
+                        total_value += ','
+                    total_value += ("*" if range[0] == None else str(range[0])) + ':' + ("*" if range[1] == None else str(range[1]))
+                
+                params['filter_docvar' + str(key)] = total_value
 
         if function_filters:
             for key in function_filters.keys():
-                params['filter_function' + key] = json.dumps(function_filters.get(key))
+                value = function_filters.get(key)
+                total_value = ''
+                                    
+                for range in value:
+                    if reallen(total_value) != 0:
+                        total_value += ','
+                    total_value += ("*" if range[0] == None else str(range[0])) + ':' + ("*" if range[1] == None else str(range[1]))
+                
+                params['filter_function' + str(key)] = total_value
 
         try:
             _, result = _request('GET', self.__search_url(), params=params)
