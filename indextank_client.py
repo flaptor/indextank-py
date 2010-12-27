@@ -1,4 +1,4 @@
-import json
+import anyjson
 import httplib
 import urllib
 import urlparse
@@ -46,6 +46,13 @@ class IndexClient:
     def __init__(self, index_url, metadata=None):
         self.__index_url = index_url
         self.__metadata = metadata
+
+    def __repr__(self):
+        if self.__metadata:
+            return 'Index %s\n  index code: %s\n  has started?: %s\n  created on: %s\n  indexed documents: %s' % (self.__index_url, self.__metadata['code'], self.__metadata['started'], self.__metadata['creation_time'], self.__metadata['size'])
+        else:
+            return 'Index %s\n  <no data available>' % (self.__index_url)
+
 
     def exists(self):
         """
@@ -185,9 +192,9 @@ class IndexClient:
         if start is not None: params['start'] = start
         if len is not None: params['len'] = len
         if scoring_function is not None: params['function'] = scoring_function
-        if snippet_fields is not None: params['snippet'] = snippet_fields
-        if fetch_fields is not None: params['fetch'] = fetch_fields
-        if category_filters is not None: params['category_filters'] = json.dumps(category_filters, ensure_ascii=True)
+        if snippet_fields is not None: params['snippet'] = reduce(lambda x,y: x + ',' + y, snippet_fields)
+        if fetch_fields is not None: params['fetch'] = reduce(lambda x,y: x + ',' + y, fetch_fields)
+        if category_filters is not None: params['category_filters'] = anyjson.serialize(category_filters)
         if variables:
             for k, v in variables.items():
                 params['var%d' % int(k)] = str(v)
@@ -225,7 +232,7 @@ class IndexClient:
     def __promote_url(self):    return '%s/promote' % (self.__index_url)
     def __search_url(self):     return '%s/search' % (self.__index_url)
     def __functions_url(self):  return '%s/functions' % (self.__index_url)
-    def __function_url(self,n): return '%s/functions/%d' % (self.__index_url, n)
+    def __function_url(self,n): return '%s/functions/%s' % (self.__index_url, n)
 
 class InvalidResponseFromServer(Exception):
     pass
@@ -253,13 +260,15 @@ def _is_ok(status):
 
 def _request(method, url, params={}, data={}, headers={}):
     splits = urlparse.urlsplit(url)
-    hostname = splits.hostname
-    port = splits.port
-    username = splits.username
-    password = splits.password
-    # drop the auth from the url
-    netloc = splits.hostname + (':%s' % splits.port if splits.port else '')
-    url = urlparse.urlunsplit((splits.scheme, netloc, splits.path, splits.query, splits.fragment))
+    netloc = splits[1]
+    netloc_noauth = netloc.split('@')[1]
+    scheme = splits[0]
+    path = splits[2]
+    query = splits[3]
+    fragment = splits[4]
+    username = ''
+    password = netloc.split('@')[0][1:]
+    url = urlparse.urlunsplit((scheme, netloc_noauth, path, query, fragment))
     if method == 'GET':
         params = urllib.urlencode(params)
         if params:
@@ -268,14 +277,14 @@ def _request(method, url, params={}, data={}, headers={}):
             else:
                 url += '&' + params
 
-    connection = httplib.HTTPConnection(hostname, port)
+    connection = httplib.HTTPConnection(netloc_noauth, 80)
     if username or password:
         credentials = "%s:%s" % (username, password)
         base64_credentials = base64.encodestring(credentials)
         authorization = "Basic %s" % base64_credentials[:-1]
         headers['Authorization'] = authorization
     if data:
-        body = json.dumps(data, ensure_ascii=True)
+        body = anyjson.serialize(data)
     else:
         body = ''
     
@@ -286,7 +295,7 @@ def _request(method, url, params={}, data={}, headers={}):
     if _is_ok(response.status):
         if response.body:
             try:
-                response.body = json.loads(response.body)
+                response.body = anyjson.deserialize(response.body)
             except ValueError, e:
                 raise InvalidResponseFromServer('The JSON response could not be parsed: %s.\n%s' % (e, response.body))
             ret = response.status, response.body
