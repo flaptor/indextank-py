@@ -113,7 +113,7 @@ class IndexClient:
         """
         Indexes a document for the given docid and fields.
         Arguments:
-            docid: unique document identifier
+            docid: unique document identifier. a str or unicode no longer than 1024 bytes.
             field: map with the document fields
             variables (optional): map integer -> float with values for variables that can
                                   later be used in scoring functions during searches. 
