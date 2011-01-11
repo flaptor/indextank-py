@@ -79,16 +79,16 @@ class IndexClient:
         return self.refresh_metadata()['started']
     
     def get_code(self):
-        return self.get_metadata()['code']
+        return self._get_metadata()['code']
 
     def get_size(self):
-        return self.get_metadata()['size']
+        return self._get_metadata()['size']
     
     def get_creation_time(self):
         """
         Returns a datetime of when this index was created 
         """
-        return _isoparse(self.get_metadata()['creation_time'])
+        return _isoparse(self._get_metadata()['creation_time'])
     
 
     def create_index(self):
@@ -206,7 +206,7 @@ class IndexClient:
             raise
 
     """ metadata management """
-    def get_metadata(self):
+    def _get_metadata(self):
         if self.__metadata is None:
             return self.refresh_metadata()
         return self.__metadata
