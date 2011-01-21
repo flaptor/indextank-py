@@ -271,7 +271,7 @@ class HttpException(Exception):
         self.msg = msg
         super(HttpException, self).__init__('HTTP %d: %s' % (status, msg))
 
-__USER_AGENT = 'IndexTank.PythonClient.v1'
+__USER_AGENT = 'Indextank-Python/1.0.2'
 
 def _is_ok(status):
     return status / 100 == 2
@@ -301,6 +301,9 @@ def _request(method, url, params={}, data={}, headers={}):
         base64_credentials = base64.encodestring(credentials)
         authorization = "Basic %s" % base64_credentials[:-1]
         headers['Authorization'] = authorization
+
+    headers['User-Agent'] = __USER_AGENT if not headers.has_key('User-Agent') else __USER_AGENT + ' ' + headers['User-Agent']
+        
     if data:
         body = anyjson.serialize(data)
     else:
