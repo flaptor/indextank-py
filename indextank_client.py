@@ -302,7 +302,7 @@ def _request(method, url, params={}, data={}, headers={}):
         authorization = "Basic %s" % base64_credentials[:-1]
         headers['Authorization'] = authorization
 
-    headers['User-Agent'] = __USER_AGENT if not headers.has_key('User-Agent') else __USER_AGENT + ' ' + headers['User-Agent']
+    headers['User-Agent'] = __USER_AGENT
         
     if data:
         body = anyjson.serialize(data)
