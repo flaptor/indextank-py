@@ -271,7 +271,7 @@ class HttpException(Exception):
         self.msg = msg
         super(HttpException, self).__init__('HTTP %d: %s' % (status, msg))
 
-__USER_AGENT = 'Indextank-Python/1.0.2'
+__USER_AGENT = 'IndexTank-Python/1.0.2'
 
 def _is_ok(status):
     return status / 100 == 2
