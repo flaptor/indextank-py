@@ -111,6 +111,19 @@ class IndexClient:
     def delete_index(self):
         _request('DELETE', self.__index_url)
     
+    def add_documents(self, documents):
+        """
+        Indexes a batch of documents.
+        Arguments:
+            documents: a list of dicts with the following format:
+                - "docid": string document id
+                - "fields": a dict string->string with the fields data
+                - "variables": a dict int->double with the document's variables (optional)
+                - "categories": a dict string->string with the value for each category for the document (optional)
+        
+        """
+        return _request('PUT', self.__docs_url(), data=documents)
+
     def add_document(self, docid, fields, variables=None):
         """
         Indexes a document for the given docid and fields.
