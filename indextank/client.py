@@ -1,3 +1,4 @@
+
 import anyjson
 import httplib
 import urllib
@@ -5,9 +6,11 @@ import urlparse
 import base64
 import datetime
 
-reallen = len
+from indextank.version import VERSION
 
-class ApiClient:
+__USER_AGENT = 'IndexTank-Python/' + VERSION
+
+class ApiClient(object):
     """
     Basic client for an account.
     It needs an API url to be constructed.
@@ -38,7 +41,7 @@ class ApiClient:
     def __indexes_url(self):      return '%s/%s/indexes' % (self.__api_url, 'v1')
     def __index_url(self, name):  return '%s/%s' % (self.__indexes_url(), urllib.quote(name))
     
-class IndexClient:
+class IndexClient(object):
     """
     Client for a specific index.
     It allows to inspect the status of the index. 
@@ -202,10 +205,10 @@ class IndexClient:
         docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
         function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
     """
-    def search(self, query, start=None, len=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
+    def search(self, query, start=None, length=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
         params = { 'q': query }
         if start is not None: params['start'] = start
-        if len is not None: params['len'] = len
+        if length is not None: params['len'] = length
         if scoring_function is not None: params['function'] = scoring_function
         if snippet_fields is not None: params['snippet'] = reduce(lambda x,y: x + ',' + y, snippet_fields)
         if fetch_fields is not None: params['fetch'] = reduce(lambda x,y: x + ',' + y, fetch_fields)
@@ -220,7 +223,7 @@ class IndexClient:
                 total_value = ''
                                     
                 for range in value:
-                    if reallen(total_value) != 0:
+                    if len(total_value) != 0:
                         total_value += ','
                     total_value += ("*" if range[0] == None else str(range[0])) + ':' + ("*" if range[1] == None else str(range[1]))
                 
@@ -232,7 +235,7 @@ class IndexClient:
                 total_value = ''
                                     
                 for range in value:
-                    if reallen(total_value) != 0:
+                    if len(total_value) != 0:
                         total_value += ','
                     total_value += ("*" if range[0] == None else str(range[0])) + ':' + ("*" if range[1] == None else str(range[1]))
                 
@@ -283,8 +286,6 @@ class HttpException(Exception):
         self.status = status
         self.msg = msg
         super(HttpException, self).__init__('HTTP %d: %s' % (status, msg))
-
-__USER_AGENT = 'IndexTank-Python/1.0.2'
 
 def _is_ok(status):
     return status / 100 == 2
