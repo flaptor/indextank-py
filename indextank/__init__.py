@@ -1,5 +1,3 @@
-
-from indextank.client import ApiClient
-from indextank.version import VERSION
+from version import VERSION
 
 __version__ = VERSION
