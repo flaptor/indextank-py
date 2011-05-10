@@ -1,5 +1,15 @@
 
-import anyjson
+try:
+    from anyjson import serialize as json_serialize
+    from anyjson import deserialize as json_deserialize
+except ImportError:
+    try:
+        from json import dumps as json_serialize
+        from json import loads as json_deserialize
+    except ImportError:
+        from simplejson import dumps as json_serialize
+        from simplejson import loads as json_deserialize
+
 import httplib
 import urllib
 import urlparse
@@ -212,7 +222,7 @@ class IndexClient(object):
         if scoring_function is not None: params['function'] = scoring_function
         if snippet_fields is not None: params['snippet'] = reduce(lambda x,y: x + ',' + y, snippet_fields)
         if fetch_fields is not None: params['fetch'] = reduce(lambda x,y: x + ',' + y, fetch_fields)
-        if category_filters is not None: params['category_filters'] = anyjson.serialize(category_filters)
+        if category_filters is not None: params['category_filters'] = json_serialize(category_filters)
         if variables:
             for k, v in variables.items():
                 params['var%d' % int(k)] = str(v)
@@ -319,7 +329,7 @@ def _request(method, url, params={}, data={}, headers={}):
     headers['User-Agent'] = __USER_AGENT
         
     if data:
-        body = anyjson.serialize(data)
+        body = json_serialize(data)
     else:
         body = ''
     
@@ -330,7 +340,7 @@ def _request(method, url, params={}, data={}, headers={}):
     if _is_ok(response.status):
         if response.body:
             try:
-                response.body = anyjson.deserialize(response.body)
+                response.body = json_deserialize(response.body)
             except ValueError, e:
                 raise InvalidResponseFromServer('The JSON response could not be parsed: %s.\n%s' % (e, response.body))
             ret = response.status, response.body
