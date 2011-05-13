@@ -147,7 +147,7 @@ class IndexClient(object):
         Arguments:
             docid: unique document identifier
         """
-        _request('DELETE', self.__docs_url(), data={'docid': docid})
+        _request('DELETE', self.__docs_url(), params={'docid': docid})
     
     def update_variables(self, docid, variables):
         """
@@ -301,7 +301,7 @@ def _request(method, url, params={}, data={}, headers={}):
     username = ''
     password = netloc.split('@')[0][1:]
     url = urlparse.urlunsplit((scheme, netloc_noauth, path, query, fragment))
-    if method == 'GET':
+    if method in ['GET', 'DELETE']:
         params = urllib.urlencode(params)
         if params:
             if '?' not in url:
