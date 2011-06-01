@@ -148,6 +148,14 @@ class IndexClient(object):
             docid: unique document identifier
         """
         _request('DELETE', self.__docs_url(), params={'docid': docid})
+
+    def delete_documents(self, docids):
+        """
+        Deletes the given docids from the index if it existed. otherwise, does nothing.
+        Arguments:
+            docids: a list of unique document identifiers
+        """
+        _request('DELETE', self.__docs_url(), params={'docid': docids})
     
     def update_variables(self, docid, variables):
         """
