@@ -155,7 +155,6 @@ class IndexClient(object):
         Arguments:
             docids: a list of unique document identifiers
         """
-	print docids
         _request('DELETE', self.__docs_url(), params={'docid': docids})
     
     def update_variables(self, docid, variables):
@@ -331,7 +330,7 @@ def _request(method, url, params={}, data={}, headers={}):
         body = anyjson.serialize(data)
     else:
         body = ''
-    print url 
+
     connection.request(method, url, body, headers)
     
     response = connection.getresponse()
