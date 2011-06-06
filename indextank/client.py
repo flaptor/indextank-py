@@ -155,7 +155,7 @@ class IndexClient(object):
         Arguments:
             docids: a list of unique document identifiers
         """
-        _request('DELETE', self.__docs_url(), params={'docid': docids})
+        return _request('DELETE', self.__docs_url(), params={'docid': docids})
     
     def update_variables(self, docid, variables):
         """
