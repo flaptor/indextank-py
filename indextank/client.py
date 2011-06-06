@@ -148,6 +148,14 @@ class IndexClient(object):
             docid: unique document identifier
         """
         _request('DELETE', self.__docs_url(), params={'docid': docid})
+
+    def delete_documents(self, docids):
+        """
+        Deletes the given docids from the index if they existed. otherwise, does nothing.
+        Arguments:
+            docids: a list of unique document identifiers
+        """
+        _request('DELETE', self.__docs_url(), params={'docid': docids})
     
     def update_variables(self, docid, variables):
         """
@@ -302,7 +310,7 @@ def _request(method, url, params={}, data={}, headers={}):
     password = netloc.split('@')[0][1:]
     url = urlparse.urlunsplit((scheme, netloc_noauth, path, query, fragment))
     if method in ['GET', 'DELETE']:
-        params = urllib.urlencode(params)
+        params = urllib.urlencode(params, True)
         if params:
             if '?' not in url:
                 url += '?' + params
@@ -322,7 +330,7 @@ def _request(method, url, params={}, data={}, headers={}):
         body = anyjson.serialize(data)
     else:
         body = ''
-    
+
     connection.request(method, url, body, headers)
     
     response = connection.getresponse()
