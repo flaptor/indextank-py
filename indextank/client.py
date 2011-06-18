@@ -7,7 +7,6 @@ import base64
 import datetime
 
 from indextank.version import VERSION
-
 __USER_AGENT = 'IndexTank-Python/' + VERSION
 
 class ApiClient(object):
@@ -25,9 +24,9 @@ class ApiClient(object):
     def get_index(self, index_name):
         return IndexClient(self.__index_url(index_name))
     
-    def create_index(self, index_name):
+    def create_index(self, index_name, public_search=False):
         index = self.get_index(index_name)
-        index.create_index()
+        index.create_index(public_search=public_search)
         return index
     
     def delete_index(self, index_name):
@@ -96,14 +95,17 @@ class IndexClient(object):
         return _isoparse(self._get_metadata()['creation_time'])
     
 
-    def create_index(self):
+    def create_index(self, public_search=False):
         """
         Creates this index. 
         If it already existed a IndexAlreadyExists exception is raised. 
         If the account has reached the limit a TooManyIndexes exception is raised
+        Arguments:
+            public_search: a boolean that sets the availability of the public API
         """
         try:
-            status, _ = _request('PUT', self.__index_url)
+            data={'public_search':public_search}
+            status, _ = _request('PUT', self.__index_url, data=data)
             if status == 204:
                 raise IndexAlreadyExists('An index for the given name already exists')
         except HttpException, e:
