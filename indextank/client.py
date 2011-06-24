@@ -24,9 +24,14 @@ class ApiClient(object):
     def get_index(self, index_name):
         return IndexClient(self.__index_url(index_name))
     
-    def create_index(self, index_name, public_search=False):
+    def create_index(self, index_name, options=None):
         index = self.get_index(index_name)
-        index.create_index(public_search=public_search)
+        index.create_index(options=options)
+        return index
+
+    def update_index(self, index_name, options):
+        index = self.get_index(index_name)
+        index.update_index(options=options)
         return index
     
     def delete_index(self, index_name):
@@ -68,7 +73,7 @@ class IndexClient(object):
             self.refresh_metadata()
             return True
         except HttpException, e:
-            if e.status == 404:
+            if e.stApiClientatus == 404:
                 return False
             else:
                 raise
@@ -93,24 +98,48 @@ class IndexClient(object):
         Returns a datetime of when this index was created 
         """
         return _isoparse(self._get_metadata()['creation_time'])
+
+    def is_public_search_enabled(self):
+        """
+        Returns whether this index has public search api enabled or not
+        """
+        return self._get_metadata()['public_search']
     
 
-    def create_index(self, public_search=False):
+    def create_index(self, options=None):
         """
         Creates this index. 
         If it already existed a IndexAlreadyExists exception is raised. 
         If the account has reached the limit a TooManyIndexes exception is raised
         Arguments:
-            public_search: a boolean that sets the availability of the public API
+            options: a map with index configuration:
+                public_search: boolean value indicating whether public search api is enable
         """
         try:
-            data={'public_search':public_search}
-            status, _ = _request('PUT', self.__index_url, data=data)
-            if status == 204:
+            if self.exists():
                 raise IndexAlreadyExists('An index for the given name already exists')
+            
+            _request('PUT', self.__index_url, data=options)
         except HttpException, e:
             if e.status == 409:
                 raise TooManyIndexes(e.msg)
+            raise e
+
+    def update_index(self, options):
+        """
+        Update this index. 
+        If it doesn't exists a IndexDoesNotExist exception is raised. 
+        Arguments:
+            options: a map with index configuration:
+                public_search: boolean value indicating whether public search api is enable
+        """
+        try:
+            if not self.exists():
+                raise IndexDoesNotExist('An index for the given name doesn\'t exist')
+
+            status, _ = _request('PUT', self.__index_url, data=options)
+            self.refresh_metadata()
+        except HttpException, e:
             raise e
         
     def delete_index(self):
@@ -283,6 +312,8 @@ class InvalidResponseFromServer(Exception):
 class TooManyIndexes(Exception):
     pass
 class IndexAlreadyExists(Exception):
+    pass
+class IndexDoesNotExist(Exception):
     pass
 class InvalidQuery(Exception):
     pass
