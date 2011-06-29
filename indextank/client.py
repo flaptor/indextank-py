@@ -58,10 +58,9 @@ class IndexClient(object):
 
     def __repr__(self):
         if self.__metadata:
-            return 'Index %s\n  index code: %s\n  has started?: %s\n  created on: %s\n  indexed documents: %s' % (self.__index_url, self.__metadata['code'], self.__metadata['started'], self.__metadata['creation_time'], self.__metadata['size'])
+            return 'Index %s\n  index code: %s\n  has started?: %s\n  status: %s\n  is public search enabled?: %s\n  created on: %s\n  indexed documents: %s' % (self.__index_url, self.__metadata['code'], self.__metadata['started'], self.__metadata['status'], self.__metadata['public_search'], self.__metadata['creation_time'], self.__metadata['size'])
         else:
             return 'Index %s\n  <no data available>' % (self.__index_url)
-
 
     def exists(self):
         """
@@ -73,7 +72,7 @@ class IndexClient(object):
             self.refresh_metadata()
             return True
         except HttpException, e:
-            if e.stApiClientatus == 404:
+            if e.status == 404:
                 return False
             else:
                 raise
@@ -86,6 +85,13 @@ class IndexClient(object):
         will raise an HttpException with a status of 503.
         """
         return self.refresh_metadata()['started']
+
+    def status(self):
+        """
+        Returns the status of this index. 
+        LIVE status means that your indexes is fully responsive.
+        """
+        return self.refresh_metadata()['status']
     
     def get_code(self):
         return self._get_metadata()['code']
@@ -101,7 +107,7 @@ class IndexClient(object):
 
     def is_public_search_enabled(self):
         """
-        Returns whether this index has public search api enabled or not
+        Returns whether this index has public search api enabled.
         """
         return self._get_metadata()['public_search']
     
