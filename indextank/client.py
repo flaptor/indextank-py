@@ -236,21 +236,21 @@ class IndexClient(object):
         _, functions = _request('GET', self.__functions_url())
         return functions 
 
-    """
-    Searches the index
-    Arguments:
-        query: the query string
-        start: result # to start at
-        len: number of results to return
-        scoring_function: a number specifying the scoring function to use when sorting results for this query
-        snippet_fields: a list of field names to retrieve snippets for
-        fetch_fields: a list of field names to retrieve content for
-        category_filter: a string to list of strings map with the values to filter for the categories (faceting)
-        variables: map integer -> float with values for variables that can later be used in scoring function
-        docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
-        function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
-    """
     def search(self, query, start=None, length=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
+        """
+        Searches the index
+        Arguments:
+            query: the query string
+            start: result # to start at
+            len: number of results to return
+            scoring_function: a number specifying the scoring function to use when sorting results for this query
+            snippet_fields: a list of field names to retrieve snippets for
+            fetch_fields: a list of field names to retrieve content for
+            category_filter: a string to list of strings map with the values to filter for the categories (faceting)
+            variables: map integer -> float with values for variables that can later be used in scoring function
+            docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+            function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+        """
         params = { 'q': query }
         if start is not None: params['start'] = start
         if length is not None: params['len'] = length
@@ -294,18 +294,18 @@ class IndexClient(object):
                 raise InvalidQuery(e.msg)
             raise
 
-    """
-    Searches the index and deletes the found results
-    Arguments:
-        query: the query string
-        start: result # to start at
-        scoring_function: a number specifying the scoring function to use when sorting results for this query
-        category_filter: a string to list of strings map with the values to filter for the categories (faceting)
-        variables: map integer -> float with values for variables that can later be used in scoring function
-        docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
-        function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
-    """
     def delete_by_search(self, query, start=None, scoring_function=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
+        """
+        Searches the index and deletes the found results
+        Arguments:
+            query: the query string
+            start: result # to start at
+            scoring_function: a number specifying the scoring function to use when sorting results for this query
+            category_filter: a string to list of strings map with the values to filter for the categories (faceting)
+            variables: map integer -> float with values for variables that can later be used in scoring function
+            docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+            function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+        """
         params = { 'q': query }
         if start is not None: params['start'] = start
         if scoring_function is not None: params['function'] = scoring_function
