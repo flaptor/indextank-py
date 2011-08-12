@@ -236,7 +236,7 @@ class IndexClient(object):
         _, functions = _request('GET', self.__functions_url())
         return functions 
 
-    def search(self, query, start=None, length=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None):
+    def search(self, query, start=None, length=None, scoring_function=None, snippet_fields=None, fetch_fields=None, category_filters=None, variables=None, docvar_filters=None, function_filters=None, fetch_variables=None, fetch_categories=None):
         """
         Searches the index
         Arguments:
@@ -250,6 +250,8 @@ class IndexClient(object):
             variables: map integer -> float with values for variables that can later be used in scoring function
             docvar_filters: map integer (variable index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
             function_filters: map integer (function index) -> list of tuples (where each tuple has the two values of a range, allowing -Infinity or Infinity)
+            fetch_variables: if True, results include document variables
+            fetch_categories: if True, results include document categories 
         """
         params = { 'q': query }
         if start is not None: params['start'] = start
@@ -258,6 +260,8 @@ class IndexClient(object):
         if snippet_fields is not None: params['snippet'] = reduce(lambda x,y: x + ',' + y, snippet_fields)
         if fetch_fields is not None: params['fetch'] = reduce(lambda x,y: x + ',' + y, fetch_fields)
         if category_filters is not None: params['category_filters'] = anyjson.serialize(category_filters)
+        if fetch_variables: params['fetch_variables'] = '*'
+        if fetch_categories: params['fetch_categories'] = '*'
         if variables:
             for k, v in variables.items():
                 params['var%d' % int(k)] = str(v)
