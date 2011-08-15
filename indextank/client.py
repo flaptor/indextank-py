@@ -6,7 +6,7 @@ import urlparse
 import base64
 import datetime
 
-from indextank.version import VERSION
+from version import VERSION
 __USER_AGENT = 'IndexTank-Python/' + VERSION
 
 class ApiClient(object):
