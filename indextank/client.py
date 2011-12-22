@@ -403,6 +403,11 @@ def _request(method, url, params={}, data={}, headers={}):
     fragment = splits[4]
     username = ''
     password = netloc.split('@')[0][1:]
+    if ':' in netloc_noauth:
+        netloc_noauth, port = netloc_noauth.split(':')
+    else:
+        port = 80
+
     url = urlparse.urlunsplit((scheme, netloc_noauth, path, query, fragment))
     if method in ['GET', 'DELETE']:
         params = urllib.urlencode(params, True)
@@ -412,7 +417,7 @@ def _request(method, url, params={}, data={}, headers={}):
             else:
                 url += '&' + params
 
-    connection = httplib.HTTPConnection(netloc_noauth, 80)
+    connection = httplib.HTTPConnection(netloc_noauth, port)
     if username or password:
         credentials = "%s:%s" % (username, password)
         base64_credentials = base64.encodestring(credentials)
