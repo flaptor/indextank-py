@@ -396,13 +396,20 @@ def _is_ok(status):
 def _request(method, url, params={}, data={}, headers={}):
     splits = urlparse.urlsplit(url)
     netloc = splits[1]
-    netloc_noauth = netloc.split('@')[1]
+    if '@' in netloc:
+        netloc_noauth = netloc.split('@')[1]
+    else:
+        netloc_noauth = netloc
+
     scheme = splits[0]
     path = splits[2]
     query = splits[3]
     fragment = splits[4]
+
     username = ''
-    password = netloc.split('@')[0][1:]
+    password = ''
+    if '@' in netloc:
+        password = netloc.split('@')[0][1:]
     if ':' in netloc_noauth:
         netloc_noauth, port = netloc_noauth.split(':')
     else:
